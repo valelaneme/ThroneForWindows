@@ -455,19 +455,22 @@ void MainWindow::refresh_proxy_list_column_size() {
         QScrollBar *vBar = ui->profilesTableView->verticalScrollBar();
         const bool vBarBlocked = vBar->blockSignals(true);
         // Header signals stay live: QTableView repaints its cells from sectionResized.
-        constexpr int columnCount = ProfilesTableModel::ColumnCount;
+        // 与 ProfilesTableModel.cpp 中的 7 列显示顺序保持一致:
+        // 0:名称, 1:类型, 2:测试结果(国家+延迟), 3:测速, 4:流量, 5:出口IP, 6:地址
+        constexpr int columnCount = 7;
         if (!group->column_width.isEmpty() && group->column_width.size() != columnCount) {
             group->column_width.clear();
         }
         if (group->column_width.isEmpty()) {
-            hHeader->setSectionResizeMode(ProfilesTableModel::ColType, QHeaderView::ResizeToContents);
-            hHeader->setSectionResizeMode(ProfilesTableModel::ColAddress, QHeaderView::Stretch);
-            hHeader->setSectionResizeMode(ProfilesTableModel::ColName, QHeaderView::Stretch);
-            hHeader->setSectionResizeMode(ProfilesTableModel::ColTestResult, QHeaderView::ResizeToContents);
-            hHeader->setSectionResizeMode(ProfilesTableModel::ColTraffic, QHeaderView::ResizeToContents);
+            hHeader->setSectionResizeMode(0, QHeaderView::Stretch);          // 名称：自动平分剩余宽度
+            hHeader->setSectionResizeMode(1, QHeaderView::ResizeToContents); // 类型：按内容自适应
+            hHeader->setSectionResizeMode(2, QHeaderView::ResizeToContents); // 测试结果(国家+延迟)：按内容自适应
+            hHeader->setSectionResizeMode(3, QHeaderView::ResizeToContents); // 测速：按内容自适应
+            hHeader->setSectionResizeMode(4, QHeaderView::ResizeToContents); // 流量：按内容自适应
+            hHeader->setSectionResizeMode(5, QHeaderView::ResizeToContents); // 出口IP：按内容自适应
+            hHeader->setSectionResizeMode(6, QHeaderView::Stretch);          // 地址：自动平分剩余宽度
             // ResizeToContents only measures on-screen rows, so pin these or they jitter while scrolling.
-            for (int col : {ProfilesTableModel::ColType,
-                            ProfilesTableModel::ColTestResult, ProfilesTableModel::ColTraffic}) {
+            for (int col : {1, 2, 3, 4, 5}) {
                 if (group->calculated_column_width.size() > col &&
                     group->calculated_column_width[col] > hHeader->sectionSize(col)) {
                     hHeader->setSectionResizeMode(col, QHeaderView::Fixed);
