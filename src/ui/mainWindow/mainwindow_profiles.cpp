@@ -55,8 +55,8 @@ void MainWindow::on_profilesTableView_doubleClicked(const QModelIndex &index) {
         finish_select_mode(id);
         return;
     }
-    auto dialog = new DialogEditProfile("", id, this);
-    connect(dialog, &QDialog::finished, dialog, &QDialog::deleteLater);
+    ui->profilesTableView->selectRow(index.row());
+    profile_start(id);
 }
 
 void MainWindow::on_menu_add_from_input_triggered() {
