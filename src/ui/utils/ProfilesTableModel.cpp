@@ -21,13 +21,13 @@ namespace {
     constexpr int ExtColOutboundIp = ProfilesTableModel::ColumnCount + 1; // 6
     constexpr int ExtColumnCount   = 7;
 
-    // 界面显示顺序: 0:名称, 1:类型, 2:测试结果(国家+延迟), 3:测速, 4:流量, 5:出口IP, 6:地址
+    // 界面显示顺序: 0:名称, 1:类型, 2:测试结果(国家+延迟), 3:流量, 4:测速, 5:出口IP, 6:地址
     constexpr int DisplayToLogical[ExtColumnCount] = {
         ProfilesTableModel::ColName,
         ProfilesTableModel::ColType,
         ProfilesTableModel::ColTestResult,
-        ExtColSpeed,
         ProfilesTableModel::ColTraffic,
+        ExtColSpeed,
         ExtColOutboundIp,
         ProfilesTableModel::ColAddress
     };
@@ -38,8 +38,8 @@ namespace {
         6,  // 1: ColAddress       -> 第 6 列
         0,  // 2: ColName          -> 第 0 列
         2,  // 3: ColTestResult    -> 第 2 列 (国家+延迟)
-        4,  // 4: ColTraffic       -> 第 4 列 (原流量)
-        3,  // 5: ExtColSpeed      -> 第 3 列 (测速)
+        3,  // 4: ColTraffic       -> 第 3 列 (流量)
+        4,  // 5: ExtColSpeed      -> 第 4 列 (测速)
         5   // 6: ExtColOutboundIp -> 第 5 列 (出口IP)
     };
 
