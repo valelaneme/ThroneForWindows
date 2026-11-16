@@ -447,6 +447,16 @@ void MainWindow::refresh_proxy_list_column_size() {
     const auto group = Configs::dataManager->groupsRepo->CurrentGroup();
     if (!group || !ui->profilesTableView->isVisible()) return;
 
+    // 每一列前面留一个字母的空间，后面留一个字母的空间（使用 '0' 的标准字符宽度）
+    const int charPad = ui->profilesTableView->fontMetrics().horizontalAdvance('0');
+    const QString padStyle = QString(
+        "QTableView::item { padding-left: %1px; padding-right: %1px; }"
+        "QHeaderView::section { padding-left: %1px; padding-right: %1px; }"
+    ).arg(charPad);
+    if (ui->profilesTableView->styleSheet() != padStyle) {
+        ui->profilesTableView->setStyleSheet(padStyle);
+    }
+
     auto *hHeader = dynamic_cast<ProfilesTableFilterHeader*>(ui->profilesTableView->horizontalHeader());
     QTimer::singleShot(0, ui->profilesTableView, [=, this]() {
         // The resizeSection / scrollbar-policy changes below re-enter here via valueChanged.
@@ -456,21 +466,25 @@ void MainWindow::refresh_proxy_list_column_size() {
         const bool vBarBlocked = vBar->blockSignals(true);
         // Header signals stay live: QTableView repaints its cells from sectionResized.
         // 与 ProfilesTableModel.cpp 中的 7 列显示顺序保持一致:
-        // 0:名称, 1:类型, 2:测试结果(国家+延迟), 3:测速, 4:流量, 5:出口IP, 6:地址
+        // 0:名称, 1:类型, 2:延迟, 3:测速, 4:流量, 5:出口IP, 6:地址
         constexpr int columnCount = 7;
         if (!group->column_width.isEmpty() && group->column_width.size() != columnCount) {
             group->column_width.clear();
         }
         if (group->column_width.isEmpty()) {
-            hHeader->setSectionResizeMode(0, QHeaderView::Stretch);          // 名称：自动平分剩余宽度
-            hHeader->setSectionResizeMode(1, QHeaderView::ResizeToContents); // 类型：按内容自适应
-            hHeader->setSectionResizeMode(2, QHeaderView::ResizeToContents); // 测试结果(国家+延迟)：按内容自适应
-            hHeader->setSectionResizeMode(3, QHeaderView::ResizeToContents); // 测速：按内容自适应
-            hHeader->setSectionResizeMode(4, QHeaderView::ResizeToContents); // 流量：按内容自适应
-            hHeader->setSectionResizeMode(5, QHeaderView::ResizeToContents); // 出口IP：按内容自适应
-            hHeader->setSectionResizeMode(6, QHeaderView::Stretch);          // 地址：自动平分剩余宽度
+            // 1~3列（0, 1, 2）：按内容自适应，完整显示
+            hHeader->setSectionResizeMode(0, QHeaderView::ResizeToContents); // 名称
+            hHeader->setSectionResizeMode(1, QHeaderView::ResizeToContents); // 类型
+            hHeader->setSectionResizeMode(2, QHeaderView::ResizeToContents); // 延迟
+
+            // 4~7列（3, 4, 5, 6）：分配剩余空间
+            hHeader->setSectionResizeMode(3, QHeaderView::Stretch);          // 测速
+            hHeader->setSectionResizeMode(4, QHeaderView::Stretch);          // 流量
+            hHeader->setSectionResizeMode(5, QHeaderView::Stretch);          // 出口IP
+            hHeader->setSectionResizeMode(6, QHeaderView::Stretch);          // 地址
+
             // ResizeToContents only measures on-screen rows, so pin these or they jitter while scrolling.
-            for (int col : {1, 2, 3, 4, 5}) {
+            for (int col : {0, 1, 2}) {
                 if (group->calculated_column_width.size() > col &&
                     group->calculated_column_width[col] > hHeader->sectionSize(col)) {
                     hHeader->setSectionResizeMode(col, QHeaderView::Fixed);
@@ -574,9 +588,9 @@ void MainWindow::url_test_current() {
                 MW_show_log(QString("UrlTest error: %1").arg(QString::fromStdString(result.results[0].error.value())));
             }
             if (latency <= 0) {
-                ui->label_running->setText(tr("Test Result") + ": " + (vpnText.isEmpty() ? tr("Unavailable") : vpnText));
+                ui->label_running->setText(tr("Latency") + ": " + (vpnText.isEmpty() ? tr("Unavailable") : vpnText));
             } else if (latency > 0) {
-                ui->label_running->setText(tr("Test Result") + ": " + QString("%1 ms").arg(latency));
+                ui->label_running->setText(tr("Latency") + ": " + QString("%1 ms").arg(latency));
             }
         });
     });
