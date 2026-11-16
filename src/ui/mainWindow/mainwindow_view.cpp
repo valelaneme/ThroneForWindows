@@ -472,19 +472,18 @@ void MainWindow::refresh_proxy_list_column_size() {
             group->column_width.clear();
         }
         if (group->column_width.isEmpty()) {
-            // 1~3列（0, 1, 2）：按内容自适应，完整显示
+            // 0~5 列全部按内容自适应，完整显示内容
             hHeader->setSectionResizeMode(0, QHeaderView::ResizeToContents); // 名称
             hHeader->setSectionResizeMode(1, QHeaderView::ResizeToContents); // 类型
             hHeader->setSectionResizeMode(2, QHeaderView::ResizeToContents); // 延迟
-
-            // 4~7列（3, 4, 5, 6）：分配剩余空间
-            hHeader->setSectionResizeMode(3, QHeaderView::Stretch);          // 测速
-            hHeader->setSectionResizeMode(4, QHeaderView::Stretch);          // 流量
-            hHeader->setSectionResizeMode(5, QHeaderView::Stretch);          // 出口IP
+            hHeader->setSectionResizeMode(3, QHeaderView::ResizeToContents); // 测速
+            hHeader->setSectionResizeMode(4, QHeaderView::ResizeToContents); // 流量
+            hHeader->setSectionResizeMode(5, QHeaderView::ResizeToContents); // 出口IP
+            // 屏幕有剩余空间时，由地址列填充（若屏幕较窄则至少保证内容完整宽度）
             hHeader->setSectionResizeMode(6, QHeaderView::Stretch);          // 地址
 
             // ResizeToContents only measures on-screen rows, so pin these or they jitter while scrolling.
-            for (int col : {0, 1, 2}) {
+            for (int col : {0, 1, 2, 3, 4, 5}) {
                 if (group->calculated_column_width.size() > col &&
                     group->calculated_column_width[col] > hHeader->sectionSize(col)) {
                     hHeader->setSectionResizeMode(col, QHeaderView::Fixed);
